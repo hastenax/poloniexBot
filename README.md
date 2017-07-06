@@ -66,8 +66,8 @@ You can craft your own cases, for example autoexchange all cryptos to preffered 
 
 Join [@poloniexExchangeBot](https://t.me/poloniexExchangeBot) channel for feedback. I use it as test channel for poloniexBot notifications.
 
-BTC: 
+BTC: 12S1fAvZt1GjoRmogGiVgb3p3u4Z52knov
 
 ETH: 0x1F575fFB648a01e248c3AA2c37269835e18C38Ff
 
-ZEC: 
+ZEC: t1ZSEie2vRrNFjtR374XxsmDooh4GeYwF2w
