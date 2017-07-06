@@ -27,7 +27,7 @@ is default delay between two consequent checks.
 	// must be uppercase
 	private $_pairs = ['ETH' => 0.5, 'BTC' => 0.5, 'LTC' => 0, 'XMR' => 0, 'ZEC' => 0];
 
-    // poloniex API keys
+	// poloniex API keys
 	// you have to keep them safe
 	// good idea is to set 600/700 permission on this file
 	private $_api_key = '<MY_API_KEY>';
@@ -55,11 +55,11 @@ You can craft your own cases, for example autoexchange all cryptos to preffered 
 	
 	$bot = new poloniexBot(['ETH' => 1, 'BTC' => 0, 'LTC' => 0, 'XMR' => 0, 'ZEC' => 0]);
 	
-    $bot->auto_exchange();
-    $bot->check_and_withdraw('ETH', '<your_address>');
+	$bot->auto_exchange();
+	$bot->check_and_withdraw('ETH', '<your_address>');
 
-    //security delay
-    sleep(1);
+	//security delay
+	sleep(1);
 ```
 
 ## Feedback and donations
