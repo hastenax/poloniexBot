@@ -6,8 +6,8 @@ and withdrawals.
 
 poloniexBot can use [Telegram API](https://core.telegram.org) to notify user about all completed rebalances, exchanges and withdrawals. 
 Set 
-`$_telegram_bot_token` and `$_telegram_channel properties`
-if you want to receive notifications to your Telegram channel.
+`$_telegram_bot_token` and `$_telegram_channel`
+properties if you want to receive notifications to your Telegram channel.
 
 In order to use poloniexBot for withdrawals you need to enable withdrawals at [poloniex api keys management page](https://poloniex.com/apiKeys).
 
@@ -17,7 +17,7 @@ Insert your poloniex API credentials into poloniexBot.php and adjust ratio of cu
 By default all ETH, BTC, LTC, XMR and ZEC deposits will be autoexchanged (rebalanced) to 50% ETH and 50% BTC using current best exchange rate.
 
 `$_min_percent = 0.005`
-means that any check_* method will initiate auto_exchange() or rebalance() if any of your asset coin rose or decline by at least 0.5%.
+means that check_and_rebalance() method will initiate rebalance() or auto_exchange() if any of your asset coin rose or decline by at least 0.5%.
 
 `$_delay_next_round`
 is default delay between two consequent checks.
