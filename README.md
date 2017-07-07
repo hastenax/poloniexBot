@@ -20,7 +20,7 @@ By default all ETH, BTC, LTC, XMR and ZEC deposits will be autoexchanged (rebala
 means that check_and_rebalance() method will initiate rebalance() or auto_exchange() if any of your asset coin rose or decline by at least 0.5%.
 
 `$_delay_next_round`
-is default delay between two consequent checks.
+is default delay between two consequent checks in seconds.
 
 ```php
 	// currencies and their proportions to be kept / autoexchanged
@@ -61,6 +61,9 @@ You can craft your own cases, for example autoexchange all cryptos to preffered 
 	//security delay
 	sleep(1);
 ```
+## Supported tickers
+
+poloniexBot supports all BTC_* pairs and only reverse pair USDT_BTC.
 
 ## Feedback and donations
 

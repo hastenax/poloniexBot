@@ -3,7 +3,7 @@
 class poloniexBot {
 	// currencies and their proportions to be kept / autoexchanged
 	// must be uppercase
-	private $_pairs = ['ETH' => 0.5, 'BTC' => 0.5, 'LTC' => 0, 'XMR' => 0, 'ZEC' => 0];
+	private $_pairs = ['ETH' => 0.5, 'BTC' => 0.5, 'LTC' => 0, 'XMR' => 0, 'ZEC' => 0, 'USDT' => 0];
 	
 	// poloniex API keys
 	// you have to keep it safe
@@ -80,6 +80,17 @@ class poloniexBot {
 		return $this->_bot->withdraw($currency, $amount, $address);
 	}
 	
+	protected function get_coin_pair_name($coinname, $coinname2 = 'BTC') {
+		return ($coinname != 'USDT') ? 'BTC_'.strtoupper($coinname) : strtoupper($coinname).'_'.strtoupper($coinname2);
+	}
+	
+	public function round_float_down($value, $precision = 8) {
+		$value = number_format($value, $precision + 2);
+		if (strlen($value) <= $precision)
+			return $value;
+		return (strpos($value, '.') !== false) ? substr($value, 0, strpos($value, '.') + 8 + 1) : substr($value, 0, 8);
+	}
+	
 	public function get_btc_balances($prices = [])
 	{
 		if (!$prices)
@@ -90,16 +101,19 @@ class poloniexBot {
 		$total = 0;
 		
 		foreach ($this->_pairs as $coin => $proportion) {
+			$balances[$coin]['amount'] = isset($available_balances['exchange'][$coin]) ? $available_balances['exchange'][$coin] : 0;
+			
 			if ($coin != 'BTC') {
-				$balances[$coin]['amount'] = isset($available_balances['exchange'][$coin]) ? $available_balances['exchange'][$coin] : 0;
-				$balances[$coin]['BTC'] = number_format(round($balances[$coin]['amount'] * $prices['BTC_'.$coin]['last'], 8, PHP_ROUND_HALF_DOWN), 8);
+				if ($coin != 'USDT')
+					$balances[$coin]['BTC'] = $this->round_float_down($balances[$coin]['amount'] * $prices[$this->get_coin_pair_name($coin)]['last']);
+				else
+					$balances[$coin]['BTC'] = $this->round_float_down($balances[$coin]['amount'] / $prices[$this->get_coin_pair_name($coin)]['last']);
+			}
+			else
+				$balances['BTC']['BTC'] = $balances['BTC']['amount'];
+			
+			if ($coin == 'BTC' || $balances[$coin]['BTC'] > 0.01)
 				$total += $balances[$coin]['BTC'];
-			}
-			else {
-				$balances['BTC']['amount'] = $available_balances['exchange']['BTC'];
-				$balances['BTC']['BTC'] = $available_balances['exchange']['BTC'];
-				$total += $balances['BTC']['BTC'];
-			}
 		}
 		$balances['BTC']['total'] = $total;
 		return $balances;
@@ -127,9 +141,15 @@ class poloniexBot {
 		if ($balances['BTC']['total'] > 0.01) {
 			foreach($this->_pairs as $coin => $target_proportion) {
 				if ($coin != 'BTC') {
-					$decisions[$coin]['change_pct'] = -1 * round(($target_proportion - $proportions[$coin]) * 100, 2);
-					$decisions[$coin]['amount_BTC'] = number_format(round($balances['BTC']['total'] * $target_proportion - $balances[$coin]['BTC'], 6, PHP_ROUND_HALF_DOWN), 8);
-					$decisions[$coin]['amount'] = number_format(round($decisions[$coin]['amount_BTC'] / $prices['BTC_'.$coin][($decisions[$coin]['amount_BTC'] > 0) ? 'lowestAsk' : 'highestBid'], 8, PHP_ROUND_HALF_DOWN), 8);
+					$change = -1 * round(($target_proportion - $proportions[$coin]) * 100, 2);
+					if (abs($change) > 0) {
+						$decisions[$coin]['change_pct'] = $change;
+						$decisions[$coin]['amount_BTC'] = $this->round_float_down($balances['BTC']['total'] * $target_proportion - $balances[$coin]['BTC']);
+						if ($coin != 'USDT')
+							$decisions[$coin]['amount'] = ($coin != 'BTC') ? $this->round_float_down($decisions[$coin]['amount_BTC'] / $prices[$this->get_coin_pair_name($coin)][($decisions[$coin]['amount_BTC'] > 0) ? 'lowestAsk' : 'highestBid']) : $decisions[$coin]['amount_BTC'];
+						else
+							$decisions[$coin]['amount'] = $this->round_float_down($decisions[$coin]['amount_BTC'] * $prices[$this->get_coin_pair_name($coin)][($decisions[$coin]['amount_BTC'] > 0) ? 'highestBid' : 'lowestAsk']);
+					}
 				}
 			}
 		}
@@ -165,7 +185,7 @@ class poloniexBot {
 		foreach($this->_pairs as $coin => $target) {
 			$change = abs($proportions[$coin] - $target);
 			if ($change > 0) {
-				$change_pct = $change / $target;
+				$change_pct = $change / ($target + 0.0000001);
 				if ($this->_dynamic_delay) {
 					if ($max_change < $change_pct)
 						$max_change = $change_pct;
@@ -188,13 +208,19 @@ class poloniexBot {
 		return $this->_bot->get_order_book($pair);
 	}
 	
-	function get_viable_price($pair, $amount, $order_book = []) {
+	function get_viable_price($coin, $amount, $order_book = []) {
 		if (!$order_book)
 			$order_book = $this->get_order_book();
 		$price = ($amount > 0) ? 0 : INF;
 		$buy = ($amount > 0);
 		$remains = abs($amount);
-		foreach($order_book['BTC_'.$pair][$buy ? 'asks' : 'bids'] as $position) {
+		
+		if ($coin != 'USDT')
+			$askorbids = $buy ? 'asks' : 'bids';
+		else
+			$askorbids = $buy ? 'bids' : 'asks';
+		
+		foreach($order_book[$this->get_coin_pair_name($coin)][$askorbids] as $position) {
 			$remains -= $position[1];
 			$price = $position[0];
 			if ($remains <= 0)
@@ -217,20 +243,24 @@ class poloniexBot {
 		// firstly sell overpluses 
 		foreach($decisions as $coin => $data) {
 				if ($data['change_pct']) {
+					$coin_ticker = $this->get_coin_pair_name($coin);
 					$price = $this->get_viable_price($coin, $data['amount'], $order_book);
+					$amount = ($coin_ticker != 'USDT_BTC') ? abs($data['amount']) : abs($data['amount_BTC']);
 
 					if ($data['amount_BTC'] < 0)
-						$results[$coin] = $this->sell('BTC_'.$coin, $price, abs($data['amount']));
+						$results[$coin] = $this->sell($coin_ticker, $price, $amount);
 				}
 		}
 
 		// then buy deficits
 		foreach($decisions as $coin => $data) {
 				if ($data['change_pct']) {
+					$coin_ticker = $this->get_coin_pair_name($coin);
 					$price = $this->get_viable_price($coin, $data['amount'], $order_book);
-
+					$amount = ($coin_ticker != 'USDT_BTC') ? abs($data['amount']) : abs($data['amount_BTC']);
+					
 					if ($data['amount_BTC'] > 0)
-						$results[$coin] = $this->buy('BTC_'.$coin, $price, abs($data['amount']));
+						$results[$coin] = $this->buy($coin_ticker, $price, $amount);
 				}
 		}
 		
@@ -244,7 +274,8 @@ class poloniexBot {
 			if (trim($this->_telegram_channel))
 				$this->_telegram_bot->sendMessage($this->_telegram_channel, str_replace($pair, '<a href="https://poloniex.com/exchange#'.  strtolower($pair).'">'.$pair.'</a>', $message), 'HTML');
 		}
-		$result = $this->_bot->buy($pair, $rate, $amount);
+		$method = ($pair != 'USDT_BTC') ? 'buy' : 'sell';
+		$result = $this->_bot->$method($pair, $rate, $amount);
 		//var_dump($result);
 		return $result;
 	}
@@ -256,7 +287,8 @@ class poloniexBot {
 			if (trim($this->_telegram_channel))
 				$this->_telegram_bot->sendMessage($this->_telegram_channel, str_replace($pair, '<a href="https://poloniex.com/exchange#'.  strtolower($pair).'">'.$pair.'</a>', $message), 'HTML');
 		}
-		$result = $this->_bot->sell($pair, $rate, $amount);
+		$method = ($pair != 'USDT_BTC') ? 'sell' : 'buy';		
+		$result = $this->_bot->$method($pair, $rate, $amount);
 		//var_dump($result);
 		return $result;
 	}
@@ -268,6 +300,7 @@ class poloniexBot {
 		$order_book = $this->get_order_book();
 		if (!is_null($prices) && is_array($balances) && $balances['BTC']['total'] > 0.01 && $this->check_proportions($proportions)) {
 			$result = $this->rebalance($balances, $proportions, $prices, $order_book);
+			//var_dump($result);
 			if ($this->_verbose) {
 				$this->_rebalances++;
 				if (trim($this->_telegram_channel)) {
