@@ -1,6 +1,6 @@
 # poloniexBot
 
-poloniexBot is an extension of the [compcentral poloniex PHP API wrapper](http://pastebin.com/iuezwGRZ).
+poloniexBot is an unofficial extension of the [poloniex PHP API wrapper by compcentral](http://pastebin.com/iuezwGRZ).
 poloniexBot is designed to perform automated poloniex assets rebalancing, cryptocurrencies exchange 
 and withdrawals. 
 
