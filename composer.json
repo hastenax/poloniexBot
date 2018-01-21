@@ -1,4 +1,9 @@
 {
     "name": "hastenax/poloniexbot",
-    "require": {}
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "hastenax\\": ""
+        }
+    }
 }
