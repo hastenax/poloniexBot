@@ -9,4 +9,3 @@
 		//security delay
 		sleep(1);
 	}
-?>
