@@ -128,21 +128,21 @@ means that check_and_rebalance() method will initiate rebalance() or auto_exchan
 is default delay between two consequent checks in seconds.
 
 ```php
-	// currencies and their proportions to be kept / autoexchanged
-	// must be uppercase
-	private $_pairs = ['ETH' => 0.5, 'BTC' => 0.5, 'LTC' => 0, 'XMR' => 0, 'ZEC' => 0];
+    // currencies and their proportions to be kept / autoexchanged
+    // must be uppercase
+    private $_pairs = ['ETH' => 0.5, 'BTC' => 0.5, 'LTC' => 0, 'XMR' => 0, 'ZEC' => 0];
 
-	// poloniex API keys
-	// you have to keep them safe
-	// good idea is to set 600/700 permission on this file
-	private $_api_key = '<MY_API_KEY>';
-	private $_api_secret = '<LONG_LONG_LONG_API_SECRET>';
+    // poloniex API keys
+    // you have to keep them safe
+    // good idea is to set 600/700 permission on this file
+    private $_api_key = '<MY_API_KEY>';
+    private $_api_secret = '<LONG_LONG_LONG_API_SECRET>';
 
-	// minimal pct. change for start rebalance
-	private $_min_percent = 0.005;
-	
-	// how many time to wait after each check, in sec.
-	private $_delay_next_round = 60;
+    // minimal pct. change for start rebalance
+    private $_min_percent = 0.005;
+
+    // how many time to wait after each check, in sec.
+    private $_delay_next_round = 60;
 ```
 
 ## Using from command line: auto exchange/rebalancing
