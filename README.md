@@ -96,7 +96,7 @@ Clone this repository or install it via composer. Insert your poloniex API crede
     var_dump($wealth);
 ```
 
-### Exchange all cryptos to a preferred one and then immediate withdraw.
+### Exchange all cryptos to a preferred one and withdraw
 
 ```php
     include 'poloniexBot.php';
@@ -116,7 +116,7 @@ Clone this repository or install it via composer. Insert your poloniex API crede
 
     $bot->check_and_rebalance();
 ```
-## Tuning targets for rebalancing.
+## Tuning targets for rebalancing
 
 By default ETH, BTC, LTC, XMR and ZEC deposits will be autoexchanged (rebalanced) to 50% ETH and 50% BTC.
 You can adjust coins and their target proportions via `$_pairs` property.
