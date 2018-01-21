@@ -8,13 +8,13 @@ class poloniexBot {
     // poloniex API keys
     // you have to keep it safe
     // good idea is to set 600/700 permission on this file
-	private $_api_key = 'KSH0ZAT4-BQ28I7SR-6GLR45ED-7KCIUZ05';
-	private $_api_secret = 'f07cd26fbea212d7e27ef3dfd69a46924e393aa171021a1b46261cc0c1a3a4a32b6c5192a04f562e48c48ae0cb9e313adff96acf5bf96aae388a6135c70e908c';
+	private $_api_key = '';
+	private $_api_secret = '';
 	
 	// telegram bot token and chat_id
 	// leave them empty if you don't want to receive notifications
-	private $_telegram_bot_token = '426988773:AAFATSgbzD5gWYARsZ0YrN_enleQ-7eTtGU';
-	private $_telegram_channel = '-1001140339515';
+	private $_telegram_bot_token = '';
+	private $_telegram_channel = '';
 
     // minimal pct. change for start rebalance
     private $_min_percent = 0.005;
