@@ -2,8 +2,6 @@
     "name": "hastenax/poloniexbot",
     "require": {},
     "autoload": {
-        "psr-4": {
-            "hastenax\\": ""
-        }
+        "classmap": ["poloniexBot.php"]
     }
 }
