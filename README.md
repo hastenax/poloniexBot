@@ -110,10 +110,10 @@ Clone this repository or install it via composer. Insert your poloniex API crede
 ### Rebalancing
 
 ```php
-	include 'poloniexBot.php';
-	
-	$bot = new poloniexBot();
-	
+    include 'poloniexBot.php';
+
+    $bot = new poloniexBot();
+
     $bot->check_and_rebalance();
 ```
 ## Tuning targets for rebalancing.
